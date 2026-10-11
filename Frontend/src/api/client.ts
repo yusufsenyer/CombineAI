@@ -1,5 +1,10 @@
 import { tokenStorage } from '../auth/tokenStorage';
-import { API_V1_URL } from '../config/env';
+import { API_BASE_URL, API_V1_URL } from '../config/env';
+
+// Dev-only, one-time: confirm EXPO_PUBLIC_API_URL is actually picked up.
+if (__DEV__) {
+  console.log(`[API] base URL: ${API_BASE_URL}`);
+}
 
 export class ApiError extends Error {
   code: string;
@@ -47,13 +52,24 @@ async function performRequest(path: string, options: RequestInit): Promise<Respo
 }
 
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  let res = await performRequest(path, options);
+  const method = (options.method ?? 'GET').toUpperCase();
+  let res: Response;
 
-  if (res.status === 401) {
-    const newAccess = await refreshAccessToken();
-    if (newAccess) {
-      res = await performRequest(path, options);
+  try {
+    res = await performRequest(path, options);
+
+    if (res.status === 401) {
+      const newAccess = await refreshAccessToken();
+      if (newAccess) {
+        res = await performRequest(path, options);
+      }
     }
+  } catch (e) {
+    // Network-level failure (server unreachable, DNS, timeout...). No token/body is logged.
+    if (__DEV__) {
+      console.log(`[API ERROR] ${method} ${path} -> network error (${API_V1_URL}${path})`);
+    }
+    throw e;
   }
 
   if (!res.ok) {
@@ -68,6 +84,11 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     } catch {
       // non-JSON error body; keep defaults
     }
+
+    if (__DEV__) {
+      console.log(`[API ERROR] ${method} ${path} -> ${res.status} ${JSON.stringify({ code, message })}`);
+    }
+
     throw new ApiError(code, message, res.status);
   }
 
