@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
@@ -12,12 +13,14 @@ import { Button } from '../../components/Button';
 import { Screen } from '../../components/Screen';
 import { Toast } from '../../components/Toast';
 import { UpgradeModal } from '../../components/UpgradeModal';
+import { AppStackParamList } from '../../navigation/types';
 import { colors, radius, spacing, typography } from '../../theme';
 
 type PickedAsset = { uri: string; fileName: string; mimeType: string };
+type Navigation = NativeStackNavigationProp<AppStackParamList>;
 
 export function AddItemScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<Navigation>();
   const queryClient = useQueryClient();
 
   const [image, setImage] = useState<PickedAsset | null>(null);
@@ -101,7 +104,7 @@ export function AddItemScreen() {
         onClose={() => setUpgradeVisible(false)}
         onUpgrade={() => {
           setUpgradeVisible(false);
-          navigation.navigate('Packages' as never);
+          navigation.navigate('Packages');
         }}
         title="Dolap limiti doldu"
         message="Free pakette 5 parça sınırına ulaştın. Sınırsız parça için premium'a yükselt."

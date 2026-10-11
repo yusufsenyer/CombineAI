@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_11_140402) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_11_140501) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -85,6 +85,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_11_140402) do
     t.index ["user_id"], name: "index_outfits_on_user_id"
   end
 
+  create_table "packages", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "name", null: false
+    t.string "price_placeholder", null: false
+    t.jsonb "features", default: [], null: false
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_packages_on_key", unique: true
+  end
+
   create_table "refresh_tokens", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "token_digest", null: false
@@ -94,6 +105,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_11_140402) do
     t.datetime "updated_at", null: false
     t.index ["token_digest"], name: "index_refresh_tokens_on_token_digest", unique: true
     t.index ["user_id"], name: "index_refresh_tokens_on_user_id"
+  end
+
+  create_table "subscriptions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "package_id", null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["package_id"], name: "index_subscriptions_on_package_id"
+    t.index ["user_id"], name: "index_subscriptions_on_user_id"
   end
 
   create_table "swipe_cards", force: :cascade do |t|
@@ -153,6 +174,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_11_140402) do
   add_foreign_key "outfit_generation_jobs", "users"
   add_foreign_key "outfits", "users"
   add_foreign_key "refresh_tokens", "users"
+  add_foreign_key "subscriptions", "packages"
+  add_foreign_key "subscriptions", "users"
   add_foreign_key "swipe_responses", "swipe_cards", column: "card_id"
   add_foreign_key "swipe_responses", "users"
   add_foreign_key "usage_counters", "users"

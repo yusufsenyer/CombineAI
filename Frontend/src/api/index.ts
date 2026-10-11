@@ -5,7 +5,6 @@ import {
   OnboardingQuestion,
   Outfit,
   Package,
-  PackageKey,
   SwipeCard,
   Usage,
   User,
@@ -84,9 +83,9 @@ export const outfitsApi = {
 
 export const packagesApi = {
   list: () => apiFetch<Package[]>('/packages'),
-  subscribe: (packageKey: PackageKey) =>
+  subscribe: (packageId: number) =>
     apiFetch<{ subscription: unknown; user: User }>('/subscriptions', {
       method: 'POST',
-      body: JSON.stringify({ package_key: packageKey }),
+      body: JSON.stringify({ package_id: packageId }),
     }),
 };

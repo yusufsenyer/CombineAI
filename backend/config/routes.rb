@@ -32,6 +32,9 @@ Rails.application.routes.draw do
       get "outfits/jobs/:job_id", to: "outfits#job"
       get "outfits", to: "outfits#index"
       get "outfits/:id", to: "outfits#show"
+
+      get "packages", to: "packages#index"
+      post "subscriptions", to: "subscriptions#create"
     end
   end
 end

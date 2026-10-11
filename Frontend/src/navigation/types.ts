@@ -29,5 +29,5 @@ export type AppStackParamList = {
   AddItem: undefined;
   OutfitDetail: { outfitId: number };
   Packages: undefined;
-  Payment: { packageKey: PackageKey };
+  Payment: { packageId: number };
 };

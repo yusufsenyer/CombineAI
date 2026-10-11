@@ -53,3 +53,36 @@ swipe_cards.each do |card|
     record.tags = card[:tags]
   end
 end
+
+packages = [
+  {
+    key: "free",
+    name: "Free",
+    price_placeholder: "0₺/ay",
+    features: [ "İlk 5 parça", "Günde 3 kombin çalıştırması", "Collage görselleştirme", "Zevk/tercih öğrenme" ],
+    sort_order: 1
+  },
+  {
+    key: "plus",
+    name: "Plus",
+    price_placeholder: "₺/ay",
+    features: [ "Sınırsız parça", "Sınırsız kombin", "Ayda 20 try-on", "Try-on görseli" ],
+    sort_order: 2
+  },
+  {
+    key: "pro",
+    name: "Pro",
+    price_placeholder: "₺/ay",
+    features: [ "Sınırsız parça", "Sınırsız kombin", "Sınırsız try-on", "Try-on görseli" ],
+    sort_order: 3
+  }
+]
+
+packages.each do |pkg|
+  Package.find_or_create_by!(key: pkg[:key]) do |record|
+    record.name = pkg[:name]
+    record.price_placeholder = pkg[:price_placeholder]
+    record.features = pkg[:features]
+    record.sort_order = pkg[:sort_order]
+  end
+end
