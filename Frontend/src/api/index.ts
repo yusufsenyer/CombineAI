@@ -60,6 +60,12 @@ export const wardrobeApi = {
       name: image.fileName,
       type: image.mimeType,
     } as unknown as Blob);
+    if (__DEV__) {
+      console.log(
+        `[UPLOAD] FormData part: ${JSON.stringify({ uri: image.uri, name: image.fileName, type: image.mimeType })}`,
+      );
+    }
+    // NOTE: no manual Content-Type header — fetch sets multipart/form-data with the boundary itself.
     return apiFetch<WardrobeItem>('/wardrobe/items', { method: 'POST', body: form });
   },
   update: (id: number, data: { category?: string; color?: string }) =>

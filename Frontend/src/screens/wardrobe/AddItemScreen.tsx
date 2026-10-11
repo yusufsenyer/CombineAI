@@ -14,16 +14,24 @@ import { Screen } from '../../components/Screen';
 import { Toast } from '../../components/Toast';
 import { UpgradeModal } from '../../components/UpgradeModal';
 import { AppStackParamList } from '../../navigation/types';
+import { prepareImageForUpload } from '../../utils/imageUpload';
 import { colors, radius, spacing, typography } from '../../theme';
 
-type PickedAsset = { uri: string; fileName: string; mimeType: string };
+type PickedAsset = {
+  uri: string;
+  fileName: string | null;
+  mimeType: string | null;
+  fileSize: number | null;
+  width: number | null;
+  height: number | null;
+};
 type Navigation = NativeStackNavigationProp<AppStackParamList>;
 
 export function AddItemScreen() {
   const navigation = useNavigation<Navigation>();
   const queryClient = useQueryClient();
 
-  const [image, setImage] = useState<PickedAsset | null>(null);
+  const [asset, setAsset] = useState<PickedAsset | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -40,29 +48,51 @@ export function AddItemScreen() {
       : await ImagePicker.launchImageLibraryAsync(options);
 
     if (!result.canceled && result.assets?.[0]) {
-      const asset = result.assets[0];
-      setImage({
-        uri: asset.uri,
-        fileName: asset.fileName ?? `photo-${Date.now()}.jpg`,
-        mimeType: asset.mimeType ?? 'image/jpeg',
-      });
+      const picked = result.assets[0];
+      const next: PickedAsset = {
+        uri: picked.uri,
+        fileName: picked.fileName ?? null,
+        mimeType: picked.mimeType ?? null,
+        fileSize: picked.fileSize ?? null,
+        width: picked.width ?? null,
+        height: picked.height ?? null,
+      };
+      if (__DEV__) {
+        console.log(`[UPLOAD] picked asset: ${JSON.stringify(next)}`);
+      }
+      setAsset(next);
     }
   };
 
   const upload = async () => {
-    if (!image) return;
+    if (!asset) return;
     setUploading(true);
     setError(null);
     try {
-      await wardrobeApi.create(image);
+      const prepared = await prepareImageForUpload(asset);
+      if (__DEV__) {
+        console.log(
+          `[UPLOAD] prepared (jpeg) file=${prepared.fileName} uri=${prepared.uri} ` +
+            `size=${prepared.width}x${prepared.height} srcBytes=${asset.fileSize ?? '?'}`,
+        );
+      }
+      await wardrobeApi.create(prepared);
       queryClient.invalidateQueries({ queryKey: ['wardrobe'] });
-      setImage(null);
+      setAsset(null);
       setToast('Eklendi');
     } catch (e) {
       if (e instanceof ApiError && e.code === 'wardrobe_limit_reached') {
         setUpgradeVisible(true);
+      } else if (e instanceof ApiError) {
+        setError(e.message);
       } else {
-        setError(e instanceof ApiError ? e.message : 'Yükleme başarısız oldu.');
+        if (__DEV__) {
+          console.log(
+            `[UPLOAD] network error — method=FormData uri=${asset.uri} ` +
+              `srcBytes=${asset.fileSize ?? '?'} name=${asset.fileName ?? '?'} type=${asset.mimeType ?? '?'}`,
+          );
+        }
+        setError('Fotoğraf yüklenemedi, tekrar dene.');
       }
     } finally {
       setUploading(false);
@@ -79,7 +109,7 @@ export function AddItemScreen() {
         <View style={styles.headerButton} />
       </View>
 
-      {!image ? (
+      {!asset ? (
         <View style={styles.sourceContainer}>
           <Text style={styles.prompt}>Parçanın fotoğrafını nasıl eklemek istersin?</Text>
           <View style={styles.sources}>
@@ -89,10 +119,10 @@ export function AddItemScreen() {
         </View>
       ) : (
         <View style={styles.previewContainer}>
-          <Image source={{ uri: image.uri }} style={styles.preview} contentFit="contain" />
+          <Image source={{ uri: asset.uri }} style={styles.preview} contentFit="contain" />
           {error ? <Text style={styles.error}>{error}</Text> : null}
           <View style={styles.previewActions}>
-            <Button label="Vazgeç" variant="secondary" onPress={() => setImage(null)} style={styles.action} />
+            <Button label="Vazgeç" variant="secondary" onPress={() => setAsset(null)} style={styles.action} />
             <Button label="Yükle" onPress={upload} loading={uploading} style={styles.action} />
           </View>
         </View>
