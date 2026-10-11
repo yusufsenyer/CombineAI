@@ -70,10 +70,12 @@ export function AddItemScreen() {
     setUploading(true);
     setError(null);
     try {
+      const prepStartedAt = Date.now();
       const prepared = await prepareImageForUpload(asset);
+      const prepMs = Date.now() - prepStartedAt;
       if (__DEV__) {
         console.log(
-          `[UPLOAD] prepared (jpeg) file=${prepared.fileName} uri=${prepared.uri} ` +
+          `[UPLOAD] prepared (jpeg) in ${prepMs}ms file=${prepared.fileName} uri=${prepared.uri} ` +
             `size=${prepared.width}x${prepared.height} srcBytes=${asset.fileSize ?? '?'}`,
         );
       }

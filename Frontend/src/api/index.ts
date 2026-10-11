@@ -1,3 +1,5 @@
+import { File } from 'expo-file-system';
+
 import { apiFetch } from './client';
 import {
   AuthResponse,
@@ -55,17 +57,17 @@ export const wardrobeApi = {
     apiFetch<WardrobeItem[]>(`/wardrobe/items${category ? `?category=${category}` : ''}`),
   create: (image: WardrobeImageFile) => {
     const form = new FormData();
-    form.append('image', {
-      uri: image.uri,
-      name: image.fileName,
-      type: image.mimeType,
-    } as unknown as Blob);
+    // SDK 57's global fetch is Expo's `expo/fetch`, which CANNOT serialize React Native's
+    // proprietary `{ uri, name, type }` FormData part — its convertFormData throws
+    // "Unsupported FormDataPart implementation". Appending an expo-file-system `File` works:
+    // expo/fetch serializes it via the file's `bytes()` method.
+    form.append('image', new File(image.uri) as unknown as Blob);
     if (__DEV__) {
       console.log(
-        `[UPLOAD] FormData part: ${JSON.stringify({ uri: image.uri, name: image.fileName, type: image.mimeType })}`,
+        `[UPLOAD] FormData File: ${JSON.stringify({ uri: image.uri, name: image.fileName, type: image.mimeType })}`,
       );
     }
-    // NOTE: no manual Content-Type header — fetch sets multipart/form-data with the boundary itself.
+    // No manual Content-Type header — expo/fetch sets multipart/form-data with the boundary itself.
     return apiFetch<WardrobeItem>('/wardrobe/items', { method: 'POST', body: form });
   },
   update: (id: number, data: { category?: string; color?: string }) =>
