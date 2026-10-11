@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(ip:*)",
+      "Shell(awk:*)",
+      "Shell(hostname:*)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}
