@@ -5,6 +5,23 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  # ActiveStorage is not auto-mounted in API-only mode; mount it so uploaded images
+  # and generated visuals are servable to the mobile client.
+  mount ActiveStorage::Engine => "/rails/active_storage"
+
+  namespace :api do
+    namespace :v1 do
+      post "auth/register", to: "auth#register"
+      post "auth/login", to: "auth#login"
+      post "auth/refresh", to: "auth#refresh"
+      post "auth/logout", to: "auth#logout"
+
+      get "me", to: "me#show"
+      get "me/usage", to: "me#usage"
+
+      get "onboarding/questions", to: "onboarding#questions"
+      get "onboarding/swipe_cards", to: "onboarding#swipe_cards"
+      post "onboarding/complete", to: "onboarding#complete"
+    end
+  end
 end

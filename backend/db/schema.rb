@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_11_133628) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_11_140203) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,6 +42,70 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_11_133628) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "onboarding_answers", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "question_key", null: false
+    t.string "answer_value", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "question_key"], name: "index_onboarding_answers_on_user_id_and_question_key", unique: true
+    t.index ["user_id"], name: "index_onboarding_answers_on_user_id"
+  end
+
+  create_table "onboarding_questions", force: :cascade do |t|
+    t.string "question_key", null: false
+    t.text "prompt", null: false
+    t.jsonb "options", default: [], null: false
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["question_key"], name: "index_onboarding_questions_on_question_key", unique: true
+  end
+
+  create_table "refresh_tokens", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "token_digest", null: false
+    t.datetime "revoked_at"
+    t.datetime "expires_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["token_digest"], name: "index_refresh_tokens_on_token_digest", unique: true
+    t.index ["user_id"], name: "index_refresh_tokens_on_user_id"
+  end
+
+  create_table "swipe_cards", force: :cascade do |t|
+    t.string "image_url", null: false
+    t.jsonb "tags", default: [], null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "swipe_responses", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "card_id", null: false
+    t.boolean "liked", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["card_id"], name: "index_swipe_responses_on_card_id"
+    t.index ["user_id", "card_id"], name: "index_swipe_responses_on_user_id_and_card_id", unique: true
+    t.index ["user_id"], name: "index_swipe_responses_on_user_id"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string "email", null: false
+    t.string "password_digest", null: false
+    t.string "name"
+    t.boolean "onboarding_completed", default: false, null: false
+    t.integer "package", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "onboarding_answers", "users"
+  add_foreign_key "refresh_tokens", "users"
+  add_foreign_key "swipe_responses", "swipe_cards", column: "card_id"
+  add_foreign_key "swipe_responses", "users"
 end
