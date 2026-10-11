@@ -87,9 +87,12 @@ export function AddItemScreen() {
         setError(e.message);
       } else {
         if (__DEV__) {
+          const err = e as Error;
+          const stack = (err?.stack ?? '').split('\n').slice(0, 6).join('\n');
           console.log(
             `[UPLOAD] network error — method=FormData uri=${asset.uri} ` +
-              `srcBytes=${asset.fileSize ?? '?'} name=${asset.fileName ?? '?'} type=${asset.mimeType ?? '?'}`,
+              `srcBytes=${asset.fileSize ?? '?'} name=${asset.fileName ?? '?'} type=${asset.mimeType ?? '?'} ` +
+              `errName=${err?.name ?? '?'} errMessage=${err?.message ?? String(e)}\n${stack}`,
           );
         }
         setError('Fotoğraf yüklenemedi, tekrar dene.');

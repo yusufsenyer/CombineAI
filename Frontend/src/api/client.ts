@@ -65,9 +65,15 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
       }
     }
   } catch (e) {
-    // Network-level failure (server unreachable, DNS, timeout...). No token/body is logged.
+    // Network/JS-level failure (server unreachable, or a request-body serialization error).
+    // Log the original error next to the "network error" label — no token/body is logged.
     if (__DEV__) {
-      console.log(`[API ERROR] ${method} ${path} -> network error (${API_V1_URL}${path})`);
+      const err = e as Error;
+      const stack = (err?.stack ?? '').split('\n').slice(0, 6).join('\n');
+      console.log(
+        `[API ERROR] ${method} ${path} -> network error (${API_V1_URL}${path}) ` +
+          `name=${err?.name ?? '?'} message=${err?.message ?? String(e)}\n${stack}`,
+      );
     }
     throw e;
   }
