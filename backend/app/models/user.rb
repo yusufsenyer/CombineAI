@@ -18,11 +18,11 @@ class User < ApplicationRecord
     "pro"  => { wardrobe_items: nil, daily_outfits: nil, outfits_per_run: 6, monthly_tryon: nil }
   }.freeze
 
-  validates :email, presence: true,
-                    uniqueness: { case_sensitive: false },
-                    format: { with: URI::MailTo::EMAIL_REGEXP }
-  validates :name, presence: true
-  validates :password, length: { minimum: 8 }, allow_nil: true
+  validates :email, presence: { message: "boş bırakılamaz" },
+                    uniqueness: { case_sensitive: false, message: "zaten kayıtlı" },
+                    format: { with: URI::MailTo::EMAIL_REGEXP, message: "geçerli bir e-posta değil" }
+  validates :name, presence: { message: "boş bırakılamaz" }
+  validates :password, length: { minimum: 8, too_short: "en az 8 karakter olmalı" }, allow_nil: true
 
   before_validation :normalize_email
 
