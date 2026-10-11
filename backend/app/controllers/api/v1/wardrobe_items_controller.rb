@@ -90,6 +90,8 @@ module Api
         base = "[UPLOAD] #{request.request_method} #{request.fullpath} " \
                "user=#{log_user_id} req=#{request.request_id} " \
                "content_type=#{request.headers['Content-Type'].to_s.inspect}"
+        debug = request.headers['X-Debug-Test']
+        base += " debug=#{debug.to_s.inspect}" if debug.present?
         image = params[:image]
 
         if image.respond_to?(:original_filename)

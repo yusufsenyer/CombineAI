@@ -15,6 +15,7 @@ import { Toast } from '../../components/Toast';
 import { UpgradeModal } from '../../components/UpgradeModal';
 import { AppStackParamList } from '../../navigation/types';
 import { prepareImageForUpload } from '../../utils/imageUpload';
+import { runUploadDiagnostics } from '../../utils/uploadDiagnostics';
 import { colors, radius, spacing, typography } from '../../theme';
 
 type PickedAsset = {
@@ -128,6 +129,20 @@ export function AddItemScreen() {
             <Button label="Vazgeç" variant="secondary" onPress={() => setAsset(null)} style={styles.action} />
             <Button label="Yükle" onPress={upload} loading={uploading} style={styles.action} />
           </View>
+          {__DEV__ ? (
+            <Pressable
+              style={styles.diagButton}
+              onPress={() =>
+                runUploadDiagnostics({
+                  uri: asset.uri,
+                  mimeType: asset.mimeType ?? 'image/jpeg',
+                  fileName: asset.fileName ?? 'photo.jpg',
+                })
+              }
+            >
+              <Text style={styles.diagText}>Teşhis (dev): A/B/C/D yükleme yöntemleri</Text>
+            </Pressable>
+          ) : null}
         </View>
       )}
 
@@ -225,5 +240,13 @@ const styles = StyleSheet.create({
   },
   action: {
     flex: 1,
+  },
+  diagButton: {
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+  },
+  diagText: {
+    ...typography.caption,
+    textDecorationLine: 'underline',
   },
 });
