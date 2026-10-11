@@ -12,6 +12,16 @@ class JsonWebToken
     nil
   end
 
+  # Same as #decode but also returns the failure reason (used only for logging).
+  def self.decode_with_reason(token)
+    body = JWT.decode(token, secret, true, algorithm: ALGORITHM).first
+    [ ActiveSupport::HashWithIndifferentAccess.new(body), nil ]
+  rescue JWT::ExpiredSignature
+    [ nil, :expired ]
+  rescue JWT::DecodeError
+    [ nil, :invalid ]
+  end
+
   def self.secret
     Rails.application.credentials.jwt_secret
   end
