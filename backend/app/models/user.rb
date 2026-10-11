@@ -4,6 +4,7 @@ class User < ApplicationRecord
   has_many :refresh_tokens, dependent: :destroy
   has_many :onboarding_answers, dependent: :destroy
   has_many :swipe_responses, dependent: :destroy
+  has_many :wardrobe_items, dependent: :destroy
 
   enum :package, { free: 0, plus: 1, pro: 2 }, default: :free
 

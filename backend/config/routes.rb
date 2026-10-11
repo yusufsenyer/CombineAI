@@ -22,6 +22,11 @@ Rails.application.routes.draw do
       get "onboarding/questions", to: "onboarding#questions"
       get "onboarding/swipe_cards", to: "onboarding#swipe_cards"
       post "onboarding/complete", to: "onboarding#complete"
+
+      get "wardrobe/items", to: "wardrobe_items#index"
+      post "wardrobe/items", to: "wardrobe_items#create"
+      patch "wardrobe/items/:id", to: "wardrobe_items#update"
+      delete "wardrobe/items/:id", to: "wardrobe_items#destroy"
     end
   end
 end
