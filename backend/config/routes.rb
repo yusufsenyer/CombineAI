@@ -27,6 +27,11 @@ Rails.application.routes.draw do
       post "wardrobe/items", to: "wardrobe_items#create"
       patch "wardrobe/items/:id", to: "wardrobe_items#update"
       delete "wardrobe/items/:id", to: "wardrobe_items#destroy"
+
+      post "outfits/generate", to: "outfits#generate"
+      get "outfits/jobs/:job_id", to: "outfits#job"
+      get "outfits", to: "outfits#index"
+      get "outfits/:id", to: "outfits#show"
     end
   end
 end
